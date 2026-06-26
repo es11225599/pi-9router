@@ -8,6 +8,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fetchModelsDevApi } from "../src/modelsdev.ts";
 import {
 	enrichModel,
 	parseNineRouterModelId,
@@ -15,14 +16,19 @@ import {
 	type NineRouterModel,
 } from "../src/mapping.ts";
 
-function loadModelsDev(): ModelsDevApi {
+async function loadModelsDev(): Promise<ModelsDevApi> {
 	const cachePath = path.resolve(process.cwd(), "models-dev-api.json");
 	if (fs.existsSync(cachePath)) {
 		return JSON.parse(fs.readFileSync(cachePath, "utf8")) as ModelsDevApi;
 	}
-	throw new Error(
-		`models-dev-api.json not found. Run a fetch first or create it at ${cachePath}`,
-	);
+	const api = await fetchModelsDevApi();
+	fs.writeFileSync(cachePath, JSON.stringify(api, null, 2), "utf8");
+	console.log(`Fetched and cached models.dev API to ${cachePath}`);
+	return api;
+}
+
+function assert(cond: boolean, message: string) {
+	if (!cond) throw new Error(`ASSERT FAILED: ${message}`);
 }
 
 const sampleModels: NineRouterModel[] = [
@@ -41,8 +47,8 @@ const sampleModels: NineRouterModel[] = [
 	{ id: "my-combo" },
 ];
 
-function main() {
-	const api = loadModelsDev();
+async function main() {
+	const api = await loadModelsDev();
 	console.log("=== 9router -> models.dev mapping test ===\n");
 
 	let matched = 0;
@@ -79,6 +85,10 @@ function main() {
 	}
 
 	console.log(`Matched: ${matched}, Unmatched: ${unmatched}`);
+	assert(matched >= 3, `expected at least 3 matches, got ${matched}`);
 }
 
-main();
+main().catch((err) => {
+	console.error(err);
+	process.exit(1);
+});

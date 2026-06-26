@@ -40,8 +40,46 @@ const mockPi = {
 	events: { on: () => {}, emit: () => {} },
 } as unknown as ExtensionAPI;
 
+const modelsDevPayload = {
+	openai: {
+		id: "openai",
+		models: {
+			"gpt-4o": {
+				id: "gpt-4o",
+				name: "GPT-4o",
+				modalities: { input: ["text", "image"], output: ["text"] },
+				limit: { context: 128_000, output: 16_384 },
+				cost: { input: 2.5, output: 10 },
+			},
+		},
+	},
+};
+
+const nineRouterPayload = {
+	object: "list",
+	data: [{ id: "openai/gpt-4o", object: "model", owned_by: "openai", kind: "llm" }],
+};
+
+const originalFetch = globalThis.fetch;
+globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+	const url = typeof input === "string" ? input : input.toString();
+	if (url.includes("models.dev/api.json")) {
+		return new Response(JSON.stringify(modelsDevPayload), { status: 200 });
+	}
+	if (url.endsWith("/models")) {
+		return new Response(JSON.stringify(nineRouterPayload), { status: 200 });
+	}
+	return originalFetch(input, init);
+};
+
+function assert(cond: boolean, message: string) {
+	if (!cond) throw new Error(`ASSERT FAILED: ${message}`);
+}
+
 async function main() {
 	await extension(mockPi);
+
+	assert(registered.length > 0, "expected at least one provider to be registered");
 
 	console.log(`Registered providers: ${registered.length}`);
 	for (const r of registered) {

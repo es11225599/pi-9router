@@ -23,6 +23,7 @@
   ],
   "scripts": {
     "check": "tsc --noEmit",
+    "test": "node --import jiti/register scripts/run-tests.ts",
     "test:mapping": "node --import jiti/register scripts/test-mapping.ts",
     "test:prefs": "node --import jiti/register scripts/test-prefs.ts",
     "test:extension": "node --import jiti/register scripts/test-extension-load.ts",
