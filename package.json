@@ -1,5 +1,5 @@
 {
-  "name": "pi-9router",
+  "name": "@es11225599/pi-9router",
   "version": "0.1.0",
   "description": "Pi package that connects to 9router and enriches its models with metadata from models.dev",
   "keywords": [
@@ -9,16 +9,17 @@
     "model-router"
   ],
   "homepage": "https://github.com/es11225599/pi-9router",
+  "bugs": {
+    "url": "https://github.com/es11225599/pi-9router/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/es11225599/pi-9router.git"
+    "url": "git+https://github.com/es11225599/pi-9router.git"
   },
   "license": "MIT",
+  "author": "es11225599",
   "type": "module",
   "main": "./src/index.ts",
-  "engines": {
-    "node": ">=22.19.0"
-  },
   "files": [
     "src",
     "README.md",
@@ -32,19 +33,21 @@
     "test:extension": "node --import jiti/register scripts/test-extension-load.ts",
     "test:real": "node --import jiti/register scripts/test-real-mapping.ts"
   },
-  "pi": {
-    "extensions": [
-      "./src/index.ts"
-    ]
-  },
-  "dependencies": {},
-  "peerDependencies": {
-    "@earendil-works/pi-ai": "*",
-    "@earendil-works/pi-coding-agent": "*"
-  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "jiti": "^2.0.0",
     "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
   }
 }
