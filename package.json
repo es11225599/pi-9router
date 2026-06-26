@@ -16,6 +16,9 @@
   "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",
+  "engines": {
+    "node": ">=22.19.0"
+  },
   "files": [
     "src",
     "README.md",

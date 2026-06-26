@@ -17,6 +17,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.19.0
+      - run: npm ci
+      - run: npm test
       - name: Create and push tag
         run: |
           tag=${{ github.event.inputs.tag }}
