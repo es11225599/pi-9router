@@ -1,0 +1,52 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create and release'
+        required: true
+        default: v0.1.0
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create and push tag
+        run: |
+          tag=${{ github.event.inputs.tag }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "Release $tag"
+          git push origin "$tag"
+      - name: Generate changelog
+        id: changelog
+        run: |
+          tag=${{ github.event.inputs.tag }}
+          prev=$(git describe --tags --abbrev=0 "${tag}^" 2>/dev/null || true)
+          if [ -n "$prev" ]; then
+            range="${prev}..${tag}"
+          else
+            range="${tag}"
+          fi
+          log=$(git log --pretty=format:'%s|%h|%an' "$range")
+          body=''
+          while IFS='|' read -r subject hash author; do
+            login=$(git log -1 --pretty=format:'%ae' "$hash" | sed 's/@.*//')
+            body="${body}- ${subject} by @${login} in ${hash}"$'\n'
+          done <<< "$log"
+          {
+            echo "body<<EOF"
+            printf '%s' "$body"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          body: ${{ steps.changelog.outputs.body }}
